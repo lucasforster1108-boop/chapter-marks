@@ -1,0 +1,2 @@
+# No Python dependencies — chapters.py uses only the standard library.
+# You do need ffmpeg and ffprobe on your PATH (any recent build will do).
