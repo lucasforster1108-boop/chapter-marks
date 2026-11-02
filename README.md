@@ -2,38 +2,48 @@
 
 # chapter-marks
 
-Long video, no chapters, and the progress bar is a guessing game. I got
-tired of scrubbing back and forth looking for "that one part", so I wrote
-this: it watches the video for you and stamps chapter markers where the
-scene actually changes.
+## In plain words first
+
+Long adult videos almost never come with chapters. If you want to jump
+to a specific part in the middle, all you can do is drag the progress
+bar and guess — too far, not far enough, back and forth.
+
+This tool watches the video for you, finds the natural break points on
+its own, and stamps chapter markers there. It writes chapter files that
+players and Stash (a library app made for exactly this kind of video)
+can read. After that, your player shows a list of chapters — click one
+and you jump straight to that part. No more scrubbing blind.
+
+It finds the breaks by looking at two things:
+
+1. **Where the picture changes scene.** One second it's this shot, the
+   next it hard-cuts to something completely different — that's usually
+   where one part ends and the next begins. Works on any video.
+2. **Where the companion funscript goes quiet for a long stretch.**
+   Some videos come with a same-named `.funscript` file — think of it
+   as an instruction sheet for a remote-controlled electric toy: as the
+   video plays, the toy moves along with it. If that instruction sheet
+   has a long run (45+ seconds by default) with almost nothing
+   happening, the action clearly paused there, so that counts as a
+   break too. It catches segment changes the camera alone can't show.
 
 ## What it does
-
-It finds chapter boundaries from two signals:
-
-1. **Scene cuts** — ffmpeg's scene detection (`select='gt(scene,…)'`).
-   Where the picture hard-cuts to something completely different, that's
-   a chapter break. This works on any video.
-2. **Dead stretches in the funscript** (optional) — if the video has a
-   companion `.funscript`, a long run of near-zero activity (a quiet
-   stretch of 45+ seconds by default) also counts as a break. Scene
-   changes the camera doesn't see still get caught this way.
 
 Both lists get merged, anything shorter than `--min-length` gets folded
 into the previous chapter, and the first chapter always starts at 0.
 
 You get three things out of it:
 
-- `<name>.ffmeta` — an FFMETADATA chapter file, ready to remux into
-  mkv/mp4
-- `<name>.chapters.json` — `title` + `start_time` per chapter, the shape
-  tools like Stash import
+- `<name>.ffmeta` — a chapter file for players (FFMETADATA format),
+  ready to tuck into an mkv/mp4
+- `<name>.chapters.json` — a simple chapter list, just a `title` and a
+  `start_time` per chapter, in the shape library tools like Stash import
 - a printed list on the console, each line tagged `[scene]` or `[gap]`
   so you know where the break came from
 
 With `--embed` it also writes `<name>_chapters.mkv` with the chapters
-muxed in — stream copy, no re-encoding, and your original file is never
-touched.
+already inside — video and audio are copied as-is, no re-encoding, and
+your original file is never touched.
 
 ## Install
 
